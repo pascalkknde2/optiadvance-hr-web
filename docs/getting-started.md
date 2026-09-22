@@ -2,15 +2,15 @@
 
 ## Current status
 
-Initialized: Next.js 16.3.5 (App Router, Turbopack), React 19.3.0, TypeScript strict mode, Tailwind CSS v4 and tRPC over TanStack Query. Git history is not yet initialized for this repository. Only the app shell, persona route stubs (`(public)`, `(authenticated)/{employee,manager,hr-admin,payroll-admin}`) and one demo tRPC procedure (`system.health`) exist; `src/features/*` business workflows are still empty placeholders.
+Initialized: Next.js 16.3.5 (App Router, Turbopack), React 19.3.0, TypeScript strict mode, Tailwind CSS v4 and tRPC over TanStack Query, managed with pnpm (pinned via `packageManager` in `package.json`). Only the app shell, persona route stubs (`(public)`, `(authenticated)/{employee,manager,hr-admin,payroll-admin}`) and one demo tRPC procedure (`system.health`) exist; `src/features/*` business workflows are still empty placeholders.
 
 ## Local commands
 
 ```
-npm install
-npm run dev      # http://localhost:3000
-npm run build
-npm run lint
+pnpm install
+pnpm dev      # http://localhost:3000
+pnpm build
+pnpm lint
 ```
 
 ## Review sequence

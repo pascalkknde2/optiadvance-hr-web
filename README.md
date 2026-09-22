@@ -28,7 +28,7 @@ Clients share API contracts and semantic design tokens, not UI source code. The 
 
 ## Local-development status
 
-Initialized: `npm install`, `npm run dev`, `npm run build` and `npm run lint` are runnable. Only the app shell, persona route stubs and the tRPC round trip (`system.health`) exist; business features under `src/features` are not implemented. Pipeline, deployment and remaining toolchain (testing, Storybook) are still TBD in the decision log. Each sibling repository will have independent Git history and releases; Git is not yet initialized for this repository.
+Initialized: `pnpm install`, `pnpm dev`, `pnpm build` and `pnpm lint` are runnable (pnpm is pinned via `packageManager` in `package.json`). Only the app shell, persona route stubs and the tRPC round trip (`system.health`) exist; business features under `src/features` are not implemented. Pipeline, deployment and remaining toolchain (testing, Storybook) are still TBD in the decision log. Git is initialized, with `main`, `develop` and `staging` branches pushed to [GitHub](https://github.com/pascalkknde2/optiadvance-hr-web); each sibling repository has independent history and releases.
 
 ## Security and contribution
 

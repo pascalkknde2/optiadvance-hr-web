@@ -15,7 +15,7 @@ All initial ADRs are **Proposed**. The bootstrap records direction requested for
 
 | ID | Unresolved decision | Owner / gate |
 | --- | --- | --- |
-| WEB-01 | Node version, browser support and prerequisites beyond the initialized toolchain (Next.js 16.3.5, React 19.3.0, npm — see `package.json`) | TBD / before related implementation |
+| WEB-01 | Node version, browser support and prerequisites beyond the initialized toolchain (Next.js 16.3.5, React 19.3.0, pnpm 10.20.0 — see `package.json`) | TBD / before related implementation |
 | WEB-02 | Hosting/runtime, actual route layout, server/client query hydration and cache policy | TBD / before related implementation |
 | WEB-03 | Session integration, cookie/CSRF choices, headers/CSP and server-only module enforcement | TBD / before related implementation |
 | WEB-04 | Storybook/addon versions, visual review tooling, test browser matrix and release ownership | TBD / before related implementation |
