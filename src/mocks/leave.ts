@@ -1,3 +1,5 @@
+import { eachDayOfInterval, parse } from "date-fns";
+
 import { employees } from "@/mocks/employees";
 
 export type LeaveType = "Annual Leave" | "Sick Leave" | "Parental Leave" | "Unpaid Leave";
@@ -52,3 +54,32 @@ export const leaveTypeColors: Record<LeaveType, string> = {
   "Parental Leave": "bg-violet-600/15 text-violet-600 border-violet-600",
   "Unpaid Leave": "bg-yellow-500/15 text-yellow-600 border-yellow-500",
 };
+
+export const leaveTypeDotColors: Record<LeaveType, string> = {
+  "Annual Leave": "bg-primary",
+  "Sick Leave": "bg-red-500",
+  "Parental Leave": "bg-violet-600",
+  "Unpaid Leave": "bg-yellow-500",
+};
+
+export interface LeaveDayEvent {
+  date: Date;
+  employeeId: string;
+  employeeName: string;
+  type: LeaveType;
+}
+
+// Expand each approved request's date range into one entry per calendar day,
+// for the month-view calendar.
+export const leaveDayEvents: LeaveDayEvent[] = leaveRequests
+  .filter((request) => request.status === "Approved")
+  .flatMap((request) => {
+    const start = parse(request.startDate, "dd MMM yyyy", new Date());
+    const end = parse(request.endDate, "dd MMM yyyy", new Date());
+    return eachDayOfInterval({ start, end }).map((date) => ({
+      date,
+      employeeId: request.employeeId,
+      employeeName: request.employeeName,
+      type: request.type,
+    }));
+  });
