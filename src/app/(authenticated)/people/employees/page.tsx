@@ -1,5 +1,6 @@
 import { Building2, UserCheck, UserMinus, Users } from "lucide-react";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import DashboardBreadcrumb from "@/components/layout/dashboard-breadcrumb";
 import EmployeesTable from "@/components/table/employees-table";
@@ -39,7 +40,9 @@ export default function EmployeesPage() {
         ))}
       </div>
 
-      <EmployeesTable />
+      <Suspense fallback={null}>
+        <EmployeesTable />
+      </Suspense>
     </>
   );
 }

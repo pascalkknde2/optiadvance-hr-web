@@ -2,6 +2,7 @@
 
 import { Plus, Search } from "lucide-react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -33,8 +34,13 @@ const statusStyles: Record<EmployeeStatus, string> = {
 };
 
 const EmployeesTable = () => {
+  const searchParams = useSearchParams();
+  const departmentParam = searchParams.get("department");
+  const initialDepartment =
+    departmentParam && departments.includes(departmentParam) ? departmentParam : "all";
+
   const [query, setQuery] = useState("");
-  const [department, setDepartment] = useState("all");
+  const [department, setDepartment] = useState(initialDepartment);
   const [status, setStatus] = useState<"all" | EmployeeStatus>("all");
   const [page, setPage] = useState(1);
 
