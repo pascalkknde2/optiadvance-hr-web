@@ -332,7 +332,7 @@
 /* ======================================== Custom Classes css Start ======================================== */
 @layer utilities {
   .card {
-    @apply bg-white dark:bg-[#273142] border border-neutral-200 dark:border-slate-700 p-6 h-full rounded-lg shadow-sm;
+    @apply bg-white dark:bg-[#273142] p-6 h-full rounded-lg border-0;
   }
 
   .active-gradient [data-state="active"] {

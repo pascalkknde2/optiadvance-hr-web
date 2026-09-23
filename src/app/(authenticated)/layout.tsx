@@ -14,7 +14,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <div className="dashboard-body flex-1 flex flex-col gap-6 p-4 md:p-6">
+        <div className="dashboard-body flex-1 flex flex-col gap-6 p-4 md:p-6 bg-neutral-100 dark:bg-[#1e2734]">
           {children}
         </div>
         <Footer />
