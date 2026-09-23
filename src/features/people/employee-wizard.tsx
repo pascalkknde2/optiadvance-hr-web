@@ -1,9 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Loader2 } from "lucide-react";
+import {
+  Check,
+  File as FileIcon,
+  FileArchive,
+  FileImage,
+  FileText,
+  Loader2,
+  Upload,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, type FieldPath } from "react-hook-form";
 import toast from "react-hot-toast";
 
@@ -32,6 +41,7 @@ import type { EmployeeDetail } from "@/lib/api/trpc/types";
 import {
   CURRENCIES,
   EMPLOYMENT_TYPES,
+  GENDERS,
   PAY_FREQUENCIES,
   employeeFormDefaults,
   employeeFormSchema,
@@ -77,11 +87,39 @@ function recordToFormValues(record: EmployeeDetail): EmployeeFormValues {
 
 const inputClass = "bg-white dark:bg-slate-800";
 
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+type DocKind = "pdf" | "doc" | "image" | "archive" | "other";
+
+const docKindFor = (name: string): DocKind => {
+  const ext = name.split(".").pop()?.toLowerCase() ?? "";
+  if (ext === "pdf") return "pdf";
+  if (ext === "doc" || ext === "docx") return "doc";
+  if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) return "image";
+  if (["zip", "rar", "7z"].includes(ext)) return "archive";
+  return "other";
+};
+
+const docStyles: Record<DocKind, { label: string; classes: string; icon: typeof FileText }> = {
+  pdf: { label: "PDF", classes: "bg-red-500/15 text-red-500", icon: FileText },
+  doc: { label: "DOC", classes: "bg-primary/15 text-primary", icon: FileText },
+  image: { label: "IMG", classes: "bg-violet-600/15 text-violet-600", icon: FileImage },
+  archive: { label: "ZIP", classes: "bg-pink-500/15 text-pink-500", icon: FileArchive },
+  other: { label: "FILE", classes: "bg-neutral-400/15 text-neutral-500 dark:text-neutral-300", icon: FileIcon },
+};
+
 const EmployeeWizard = ({ employeeId }: { employeeId?: string }) => {
   const router = useRouter();
   const utils = api.useUtils();
   const isEdit = Boolean(employeeId);
   const [stepIndex, setStepIndex] = useState(0);
+  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: existing, isLoading } = api.people.get.useQuery(
     { id: employeeId ?? "" },
@@ -148,6 +186,29 @@ const EmployeeWizard = ({ employeeId }: { employeeId?: string }) => {
   };
 
   const goBack = () => setStepIndex((index) => Math.max(0, index - 1));
+
+  const addDocumentFiles = (incoming: FileList | File[]) => {
+    const newFiles = Array.from(incoming);
+    if (!newFiles.length) return;
+    setDocumentFiles((prev) => {
+      const merged = [...prev];
+      for (const file of newFiles) {
+        if (!merged.some((existing) => existing.name === file.name && existing.size === file.size)) {
+          merged.push(file);
+        }
+      }
+      return merged;
+    });
+  };
+
+  const removeDocumentFile = (name: string) => {
+    setDocumentFiles((prev) => prev.filter((file) => file.name !== name));
+  };
+
+  useEffect(() => {
+    form.setValue("documentNames", documentFiles.map((file) => file.name), { shouldDirty: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documentFiles]);
 
   if (isEdit && isLoading) {
     return (
@@ -276,15 +337,26 @@ const EmployeeWizard = ({ employeeId }: { employeeId?: string }) => {
                   )} />
                   <FormField control={form.control} name="dateOfBirth" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date of birth (optional)</FormLabel>
+                      <FormLabel>Date of birth</FormLabel>
                       <FormControl><Input type="date" {...field} className={inputClass} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="gender" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Gender (optional)</FormLabel>
-                      <FormControl><Input {...field} className={inputClass} /></FormControl>
+                      <FormLabel>Gender</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={inputClass}>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {GENDERS.map((gender) => (
+                            <SelectItem key={gender} value={gender}>{gender}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )} />
@@ -507,28 +579,93 @@ const EmployeeWizard = ({ employeeId }: { employeeId?: string }) => {
               {step.id === "documents" && (
                 <div className="sm:col-span-2">
                   <FormLabel>Documents</FormLabel>
-                  <Input
-                    type="file"
-                    multiple
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    className={`mt-1.5 ${inputClass}`}
-                    onChange={(event) => {
-                      const names = Array.from(event.target.files ?? []).map((file) => file.name);
-                      form.setValue("documentNames", names, { shouldDirty: true });
-                    }}
-                  />
-                  <p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-300">
+                  <p className="mb-3 mt-1 text-xs text-neutral-500 dark:text-neutral-300">
                     Contract, ID and right-to-work evidence. Expiry dates feed the document-expiry alerts.
                   </p>
-                  {form.watch("documentNames")?.length ? (
-                    <ul className="mt-2 space-y-1 text-sm">
-                      {form.watch("documentNames")?.map((name) => (
-                        <li key={name} className="flex items-center gap-2">
-                          <Check className="h-3.5 w-3.5 text-green-600" /> {name}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
+
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    {/* Drop zone */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => fileInputRef.current?.click()}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") fileInputRef.current?.click();
+                      }}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setIsDragging(true);
+                      }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        setIsDragging(false);
+                        addDocumentFiles(event.dataTransfer.files);
+                      }}
+                      className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-12 text-center transition-colors ${
+                        isDragging
+                          ? "border-primary bg-primary/5"
+                          : "border-neutral-300 dark:border-slate-600 hover:border-primary/60"
+                      }`}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                        className="hidden"
+                        onChange={(event) => {
+                          if (event.target.files) addDocumentFiles(event.target.files);
+                          event.target.value = "";
+                        }}
+                      />
+                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <Upload className="h-6 w-6" />
+                      </span>
+                      <p className="text-sm">
+                        Drop your files here, or <span className="font-medium text-primary">Browse</span>
+                      </p>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500">PDF, DOC, JPG or PNG</p>
+                    </div>
+
+                    {/* File list */}
+                    <div className="space-y-3">
+                      {documentFiles.length === 0 ? (
+                        <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-neutral-200 dark:border-slate-600 px-6 py-12 text-center">
+                          <p className="text-sm text-neutral-500 dark:text-neutral-300">No files attached yet.</p>
+                        </div>
+                      ) : (
+                        documentFiles.map((file) => {
+                          const { classes, icon: Icon } = docStyles[docKindFor(file.name)];
+                          return (
+                            <div
+                              key={file.name}
+                              className="flex items-center gap-3 rounded-lg border border-neutral-200 dark:border-slate-600 p-3"
+                            >
+                              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded ${classes}`}>
+                                <Icon className="h-4 w-4" />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium">{file.name}</p>
+                                <p className="text-xs text-neutral-500 dark:text-neutral-300">{formatFileSize(file.size)}</p>
+                                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-slate-700">
+                                  <div className="h-full w-full rounded-full bg-green-600" />
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeDocumentFile(file.name)}
+                                className="shrink-0 text-neutral-400 hover:text-red-500"
+                                aria-label={`Remove ${file.name}`}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
