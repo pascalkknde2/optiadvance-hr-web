@@ -2,8 +2,8 @@
 
 import { Download, Search } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,12 +151,14 @@ const PayslipsTable = () => {
                   </TableCell>
                   <TableCell className="py-3 px-4 border-b border-neutral-200 dark:border-slate-600 text-center">
                     <Button
+                      asChild
                       size="icon"
                       variant="ghost"
                       className="rounded-full text-primary bg-primary/10"
-                      onClick={() => toast(`${slip.employeeName}'s payslip download isn't wired up yet.`)}
                     >
-                      <Download className="w-4 h-4" />
+                      <Link href={`/payroll/payslips/${encodeURIComponent(slip.id)}`} aria-label={`View ${slip.employeeName}'s payslip`}>
+                        <Download className="w-4 h-4" />
+                      </Link>
                     </Button>
                   </TableCell>
                 </TableRow>

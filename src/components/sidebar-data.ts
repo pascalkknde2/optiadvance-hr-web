@@ -80,6 +80,7 @@ export const data = {
         { title: "Payroll Runs", url: "/payroll/runs", circleColor: "bg-primary" },
         { title: "Salaries", url: "/payroll/salaries", circleColor: "bg-yellow-500" },
         { title: "Payslips", url: "/payroll/payslips", circleColor: "bg-green-600" },
+        { title: "Payslip Template", url: "/payroll/payslip-template", circleColor: "bg-violet-600" },
         { title: "Earnings", url: "/payroll/earnings", circleColor: "bg-cyan-500" },
         { title: "Deductions", url: "/payroll/deductions", circleColor: "bg-red-500" },
       ],

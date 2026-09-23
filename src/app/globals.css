@@ -483,3 +483,17 @@ html[layout="boron"] .dashboard-sidebar-container {
   );
 }
 /* ======================================= Layout Css End ================================== */
+
+/* Print: show only page content (e.g. a payslip), never the app chrome. */
+@media print {
+  .dashboard-sidebar-container,
+  .dashboard-header,
+  .d-footer {
+    display: none !important;
+  }
+
+  .dashboard-body {
+    padding: 0 !important;
+    background: white !important;
+  }
+}
